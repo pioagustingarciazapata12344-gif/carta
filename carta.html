@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Para alguien muy especial 🌻</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Caveat:wght@500;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  .Angie{
+    width:180px;
+    height:180px;
+    object-fit:cover;
+    border-radius: 50%;
+    display: block;
+    margin:0 auto 20px;
+    border: 4px solid var(--amarillo-suave);
+    box-shadow: 0 8px 20px var(--sombra);
+  }
+    @media (max-width: 420px){
+    .titulo-1{ font-size: 1.4rem; }
+    .hoja-carta{ padding: 30px 20px 36px; }
+    .carta-texto{ font-size: 1.28rem; }
+    .sobre{ width: 220px; height: 150px; }
+    .final-titulo{ font-size: 1.55rem; }
+  }
+
+  .video-contenedor{
+    Width: min(92vw, 480px);
+    Margin: 26px auto 0;
+    Border-radius: 14px;
+    Overflow: hidden;
+    Box-shadow: 0 14px 34px var(--sombra);
+    Background: #000;
+  }
+  .video-contenedor video{
+    Display: block;
+    Width: 100%;
+    Height: auto;
+  }
+
+  .flor{
+    Transform: translateY(20px) scale(0.6) rotate(var(--rot, 0deg));
+  }
+  @keyframes brotar{
+    To{ opacity:1; transform: translateY(0) scale(1) rotate(var(--rot, 0deg)); }
+  }
+
+  #stage{
+    min-height: 100vh;
+  }
+
+  /* ===================================================
+     PALETA Y VARIABLES
+  =================================================== */
+  :root{
+    --crema: #FBF6E9;
+    --crema-osc: #F3E9D2;
+    --papel: #FFFDF8;
+    --amarillo: #F4C542;
+    --amarillo-suave: #FBDD8B;
+    --dorado: #C99A2E;
+    --verde: #7C9A5C;
+    --verde-osc: #5C7A45;
+    --texto: #4A4032;
+    --texto-suave: #7A6F5C;
+    --sombra: rgba(150, 120, 40, 0.18);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0;
+    width:100%; min-height:100%;
+    overflow-x:hidden;
+    background: radial-gradient(ellipse at top, var(--crema) 0%, var(--crema-osc) 100%);
+    font-family: 'Jost', sans-serif;
+    color: var(--texto);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #stage{
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px 16px 64px;
+  }
+
+  h1,h2,h3,.serif{
+    font-family: 'Cormorant Garamond', serif;
+    font-weight:600;
+    letter-spacing: 0.3px;
+  }
+
+  .mano{
+    font-family: 'Caveat', cursive;
+  }
+
+  /* ===================================================
+     FONDO: pétalos y textura de papel
+  =================================================== */
+  #campo-petalos{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .petalo{
+    position:absolute;
+    top:-40px;
+    width: 14px;
+    height: 14px;
+    background: var(--amarillo);
+    border-radius: 60% 0 60% 0;
+    opacity: 0.75;
+    filter: drop-shadow(0 1px 2px rgba(120,90,20,0.25));
+    animation-name: caer;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+  }
+
+  @keyframes caer{
+    0%{ transform: translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    8%{ opacity:0.8; }
+    100%{ transform: translateY(110vh) translateX(var(--drift, 40px)) rotate(320deg); opacity:0; }
+  }
+
+  #brillo-fondo{
+    position: fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(244,197,66,0.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(124,154,92,0.08), transparent 45%);
+  }
+
+  /* ===================================================
+     ESCENAS GENERALES
+  =================================================== */
+  .escena{
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 560px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    animation: apareceEscena 0.9s ease forwards;
+  }
+  .escena.activa{ display:flex; }
+
+  @keyframes apareceEscena{
+    from{ opacity:0; transform: translateY(18px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .oculto{ opacity:0 !important; }
+
+  .texto-suave{
+    color: var(--texto-suave);
+    font-size: 1.02rem;
+    line-height: 1.65;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+  }
+
+  /* Botones */
+  .boton{
+    margin-top: 34px;
+    padding: 14px 34px;
+    border: 1.5px solid var(--dorado);
+    background: linear-gradient(180deg, #FFF7E0, #FBE9B8);
+    color: #6b4f16;
+    border-radius: 30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px var(--sombra);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .boton:hover{
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 24px var(--sombra);
+  }
+  .boton:active{ transform: translateY(0) scale(0.98); }
+
+  .boton.pequeno{
+    padding: 9px 22px;
+    font-size: 0.98rem;
+    margin-top: 22px;
+  }
+
+  /* ===================================================
+     ESCENA 1: TARJETA CERRADA
+  =================================================== */
+  .tarjeta-cerrada{
+    position: relative;
+    width: min(88vw, 380px);
+    padding: 52px 30px 46px;
+    background: var(--papel);
+    border-radius: 14px;
+    box-shadow: 0 18px 45px var(--sombra), 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid rgba(201,154,46,0.25);
+  }
+
+  .tarjeta-cerrada::before{
+    content:"";
+    position:absolute;
+    inset: 10px;
+    border: 1px solid rgba(201,154,46,0.35);
+    border-radius: 9px;
+    pointer-events:none;
+  }
+
+  .flor-mini{
+    font-size: 2.4rem;
+    display:inline-block;
+    animation: balanceo 4.5s ease-in-out infinite;
+  }
+  @keyframes balanceo{
+    0%,100%{ transform: rotate(-4deg); }
+    50%{ transform: rotate(4deg); }
+  }
+
+  .titulo-1{
+    font-size: 1.65rem;
+    margin: 14px 0 18px;
+    color: #6b4f16;
+  }
+
+  /* ===================================================
+     ESCENA 2: RAMO DE FLORES
+  =================================================== */
+  .ramo-contenedor{
+    position: relative;
+    width: 240px;
+    height: 200px;
+    margin-bottom: 6px;
+  }
+
+  .flor{
+    position:absolute;
+    bottom: 20px;
+    width: 46px;
+    height: 46px;
+    opacity: 0;
+    transform: translateY(20px) scale(0.6);
+    animation: brotar 0.8s ease forwards;
+  }
+  .flor .tallo{
+    position:absolute;
+    bottom:-70px; left:50%;
+    width:3px; height:70px;
+    background: var(--verde-osc);
+    transform: translateX(-50%);
+    border-radius:2px;
+  }
+  .flor .centro{
+    position:absolute;
+    width:14px; height:14px;
+    background: #8a6a1d;
+    border-radius:50%;
+    top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .petalo-flor{
+    position:absolute;
+    width:20px; height:26px;
+    background: linear-gradient(180deg, var(--amarillo-suave), var(--amarillo));
+    border-radius: 60% 60% 60% 60%;
+    top:50%; left:50%;
+    transform-origin: center bottom;
+    box-shadow: 0 1px 2px rgba(150,110,20,0.25);
+  }
+
+  @keyframes brotar{
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .frase-ramo{
+    margin-top: 46px;
+    font-size: 1.18rem;
+    line-height: 1.6;
+    max-width: 380px;
+  }
+  .frase-ramo .l2{
+    display:block;
+    margin-top: 14px;
+    color: #6b4f16;
+  }
+
+  /* ===================================================
+     ESCENA 3: FRASE ESPECIAL (tarjetita)
+  =================================================== */
+  .tarjetita{
+    background: var(--papel);
+    border-radius: 12px;
+    padding: 34px 26px;
+    box-shadow: 0 14px 34px var(--sombra);
+    border: 1px solid rgba(201,154,46,0.25);
+    max-width: 420px;
+    font-family:'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    line-height: 1.75;
+    color: var(--texto);
+  }
+  .tarjetita .final{
+    margin-top: 16px;
+    font-family:'Caveat', cursive;
+    font-size: 1.7rem;
+    color: #a9781f;
+  }
+
+  /* ===================================================
+     ESCENA 4: SOBRE
+  =================================================== */
+  .escena-sobre{ perspective: 1200px; }
+
+  .sobre{
+    position: relative;
+    width: 260px;
+    height: 175px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .sobre-cuerpo{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(180deg, #FCEFC7, #F4DE9C);
+    border-radius: 8px;
+    box-shadow: 0 14px 30px var(--sombra);
+    border: 1px solid rgba(160,120,20,0.25);
+  }
+
+  .sobre-solapa{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    clip-path: polygon(0 0, 100% 0, 50% 58%);
+    background: linear-gradient(160deg, #F6E0A0, #E9C877);
+    border-radius: 8px 8px 0 0;
+    transform-origin: top;
+    transition: transform 0.7s cubic-bezier(.6,.1,.2,1);
+    z-index:2;
+    box-shadow: 0 3px 6px rgba(120,90,20,0.15);
+  }
+
+  .sobre.abierto .sobre-solapa{
+    transform: rotateX(180deg);
+  }
+
+  .sobre-sello{
+    position:absolute;
+    left:50%; top:58%;
+    transform: translate(-50%,-50%);
+    font-size: 1.6rem;
+    z-index:3;
+    animation: latido 2.4s ease-in-out infinite;
+  }
+  @keyframes latido{
+    0%,100%{ transform: translate(-50%,-50%) scale(1); }
+    50%{ transform: translate(-50%,-50%) scale(1.12); }
+  }
+
+  .sobre-texto{
+    position:absolute;
+    bottom: 16px; left:0; right:0;
+    text-align:center;
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    color:#6b4f16;
+    font-size: 1rem;
+    z-index:1;
+  }
+
+  .indicacion{
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+
+  /* ===================================================
+     ESCENA 5: CARTA
+  =================================================== */
+  .hoja-carta{
+    background:
+      repeating-linear-gradient(var(--papel) 0 34px, rgba(201,154,46,0.10) 34px 35px);
+    background-color: var(--papel);
+    width: min(92vw, 460px);
+    padding: 40px 30px 46px;
+    border-radius: 4px;
+    box-shadow: 0 20px 50px var(--sombra);
+    text-align: left;
+    position: relative;
+    transform: translateY(30px);
+    opacity: 0;
+    animation: entraCarta 0.9s ease forwards;
+  }
+
+  @keyframes entraCarta{
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .hoja-carta::before{
+    content:"🌻";
+    position:absolute;
+    top:-18px; right: 22px;
+    font-size: 1.8rem;
+    filter: drop-shadow(0 4px 6px rgba(120,90,20,0.25));
+  }
+
+  .carta-texto{
+    font-family: 'Caveat', cursive;
+    font-size: 1.45rem;
+    line-height: 1.55;
+    color: #5a4b28;
+    white-space: pre-line;
+  }
+
+  .carta-firma{
+    margin-top: 18px;
+    text-align: right;
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    color: #a9781f;
+  }
+
+  /* ===================================================
+     ESCENA 6: INTERACCIÓN EXTRA
+  =================================================== */
+  .jardin-extra{
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    height: 90px;
+    margin-bottom: 8px;
+  }
+  .mini-flor{
+    position:absolute;
+    bottom:0;
+    font-size: 1.6rem;
+    opacity:0;
+    animation: subeMini 0.7s ease forwards;
+  }
+  @keyframes subeMini{
+    to{ opacity:1; transform: translateY(-14px); }
+  }
+
+  /* ===================================================
+     ESCENA FINAL: JARDÍN
+  =================================================== */
+  .jardin-final{
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    padding: 46px 24px 30px;
+    background: linear-gradient(180deg, rgba(255,253,248,0.6), rgba(251,246,233,0.9));
+    border-radius: 20px;
+    border: 1px solid rgba(201,154,46,0.25);
+    box-shadow: 0 18px 40px var(--sombra);
+  }
+
+  .linea-flores{
+    font-size: 1.9rem;
+    letter-spacing: 6px;
+    margin-bottom: 6px;
+  }
+
+  .final-titulo{
+    font-size: 1.9rem;
+    color: #6b4f16;
+    margin: 10px 0 16px;
+  }
+
+  .corazon-flot{
+    position:fixed;
+    z-index:2;
+    pointer-events:none;
+    font-size: 1.1rem;
+    opacity: 0.8;
+    animation-name: flotarCorazon;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+  }
+  @keyframes flotarCorazon{
+    0%{ transform: translateY(0) scale(0.8); opacity:0; }
+    15%{ opacity:0.85; }
+    100%{ transform: translateY(-70vh) scale(1.05); opacity:0; }
+  }
+
+  .firma-final{
+    margin-top: 24px;
+    font-family:'Caveat', cursive;
+    font-size: 1.7rem;
+    color:#a9781f;
+  }
+
+  /* ===================================================
+     RESPONSIVE
+  =================================================== */
+  @media (max-width: 420px){
+    .titulo-1{ font-size: 1.4rem; }
+    .hoja-carta{ padding: 30px 20px 36px; }
+    .carta-texto{ font-size: 1.28rem; }
+    .sobre{ width: 220px; height: 150px; }
+    .final-titulo{ font-size: 1.55rem; }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="brillo-fondo"></div>
+<div id="campo-petalos"></div>
+
+<div id="stage">
+
+  <!-- ESCENA 1: TARJETA CERRADA -->
+  <section class="escena activa" id="escena-1">
+    <div class="tarjeta-cerrada">
+      <img src="IMAGEN1.jpg" class="sara" alt="Un recuerdo">
+      <span class="flor-mini">🌻</span>
+      <h1 class="titulo-1">Para alguien que aprecio demasiado.</h1>
+      <p class="texto-suave">Entre tantas redes que existen en el mundo</p>
+<p>entre señales que viajan sin poderse ver,
+encontré una conexión diferente,
+una que no necesita cables para hacerme querer</p>
+
+como una señal inalámbrica,
+que atraviesa la distancia sin preguntar,
+porque aunque estés lejos de mis manos,
+mi corazón siempre te puede alcanzar
+
+Dicen que una WLAN conecta dispositivos,
+pero tú conectaste algo mucho más profundo:
+mi presente con tus ojos,
+mis sueños con tu mundo.
+
+Y si el amor tuviera un protocolo,
+yo elegiría siempre el mismo canal,
+porque entre millones de señales,
+la tuya es la única que quiero escuchar.
+
+Somos como dos dispositivos buscando conexión,
+y cuando nuestros corazones se encuentran,
+desaparece todo el ruido,
+y solamente nuestras almas se entienden.
+
+No importa cuántos obstáculos aparezcan,
+ni cuánta distancia exista entre los dos;
+si nuestra señal permanece estable,
+siempre encontraré el camino hacia tu corazón.
+
+Porque las ondas electromagnéticas
+viajan incluso donde los ojos no pueden mirar,
+y así también viaja mi amor por ti:
+invisible, pero imposible de negar.
+
+Si algún día nuestra comunicación falla,
+no quiero perder nuestra conexión;
+buscaré otra frecuencia, otro camino,
+pero jamás otra dirección.
+
+Porque entre todas las redes del mundo,
+entre millones de señales al pasar,
+mi corazón ya encontró su contraseña:
+tu nombre, que nunca quiero olvidar. ❤️
+
+Y si algún día me preguntan
+qué significa para mí estar conectado,
+no hablaré de cables, routers ni antenas…
+diré simplemente: “amarte y sentirme amado”.,<br>Cuenta la leyenda que el sol y la luna sienpre estuvieron enamorados pero nunca podrán estar juntos pero Dios 
+como como acto de amor creo el eclipse como prueba que el verdadero amor si existe para que los dos puedan estar juntos así como nosotros crearé l
+ inposible para poder estar junto al amor de mi vida y poder estar con tigo y te esperare hasta el fin de mis tiempos así como el sol espera ver a
+ su hermosa luna yo esperare a ver mi hermano flor te amo mi niña hermosa</p>
+      <button class="boton" onclick="irA(2)">✨ Abrir mi regalo ✨</button>
+    </div>
+  </section>
+
+  <!-- ESCENA 2: RAMO -->
+  <section class="escena" id="escena-2">
+    <div class="ramo-contenedor" id="ramo"></div>
+    <p class="frase-ramo serif">
+      Hoy quiero regalarte flores amarillas...
+      <span class="l2">...porque mereces recibir cosas bonitas, pero sobre todo porque porque para mi eres la unica persona ala que amo 
+        eres la unia que se mecere todo el mundo yo are asta lo inposible para dartelo . 💛</span>
+    </p>
+    <button class="boton" onclick="irA(3)">Seguir</button>
+  </section>
+
+  <!-- ESCENA 3: FRASE ESPECIAL -->
+  <section class="escena" id="escena-3">
+    <div class="tarjetita">
+      Dicen que las flores amarillas representan alegría, amistad, esperanza y nuevos comienzos.
+      <br><br>
+      Pero para mí, estas flores simplemente significan:
+      <div class="final">"Que no me olvide de ti." 🌻</div>
+    </div>
+    <button class="boton" onclick="irA(4)">Seguir</button>
+  </section>
+
+  <!-- ESCENA 4: SOBRE -->
+  <section class="escena escena-sobre" id="escena-4">
+    <div class="sobre" id="sobre" onclick="abrirSobre()">
+      <div class="sobre-cuerpo"></div>
+      <div class="sobre-solapa"></div>
+      <div class="sobre-sello">💛</div>
+      <div class="sobre-texto">💌 Tengo algo que decirte...</div>
+    </div>
+    <p class="indicacion">Toca el sobre para abrirlo</p>
+  </section>
+
+  <!-- ESCENA 5: CARTA -->
+  <section class="escena" id="escena-5">
+    <div class="hoja-carta">
+      <div class="carta-texto" id="texto-carta"></div>
+      <div class="carta-firma" id="firma-carta"></div>
+    </div>
+    <button class="boton" id="boton-extra" onclick="irA(6)" style="display:none;">🌻 Todavía hay algo más...</button>
+  </section>
+
+  <!-- ESCENA 6: INTERACCIÓN EXTRA -->
+  <section class="escena" id="escena-6">
+    <div class="jardin-extra" id="jardin-extra"></div>
+    <p class="texto-suave" style="max-width:380px;">
+      Si pudiera convertir mis pensamientos en flores, probablemente tendría un jardín entero dedicado a ti. Pero lastimosamente soy pobre asi que ese jardin seria digital.
+    </p>
+    <p>
+        
+    </p>
+    <p class="serif" style="font-size:1.2rem; color:#6b4f16; margin-top:14px;">Gracias por ser mi ENAMORADA. 💛</p>
+    <button class="boton" onclick="irA(7)">Ver el final</button>
+  </section>
+
+  <!-- ESCENA 7: FINAL -->
+  <section class="escena" id="escena-7">
+    <div class="jardin-final">
+      <div class="linea-flores">🌻🌻🌻🌻🌻</div>
+      <h2 class="final-titulo" id="titulo-final"></h2>
+      <p class="texto-suave">
+        Que nunca te falten motivos para sonreír,<br>
+        personas que te quieran<br>
+        y flores que te recuerden lo especial que eres mi nIña.
+      </p>
+      <div class="firma-final" id="firma-final"></div>
+    </div>
+   
+</div>
+
+<script>
+// ===== PERSONALIZACIÓN =====
+const nombre = "SARAY";
+const remitente = "Con cariño ";
+const fecha = "21 de septiembre";
+// ============================
+
+const cartaTexto =
+`Para ti, ${nombre}:
+
+Frente al mar
+
+Sentados frente al mar comprendí que las olas nunca regresan siendo las mismas, igual que nosotros. El tiempo nos cambia sin pedir permiso, pero hay recuerdos que siguen viviendo aunque los años pasen.
+
+El viento pronuncia tu nombre con una dulzura que duele, y el horizonte guarda todos esos sueños que alguna vez prometimos alcanzar juntos. A veces el amor no termina porque deje de sentirse; termina porque la vida decide escribir un camino diferente para dos corazones que todavía se extrañan.
+
+El mar conoce nuestros silencios. Sabe de las lágrimas que nadie vio, de los abrazos que quedaron pendientes y de las palabras que nunca nos atrevimos a decir.
+
+Si algún día vuelves a este mismo lugar, quizá ya no encuentres mis huellas sobre la arena, porque el mar las habrá borrado. Pero si cierras los ojos, sentirás que una parte de mi alma todavía sigue aquí, esperando ese instante imposible en el que el destino nos permita sentarnos otra vez, frente al mar, como si el tiempo jamás hubiera existido.
+
+Porque hay amores que no mueren; simplemente aprenden a vivir en el recuerdo, donde ninguna distancia, ninguna tormenta y ningún olvido pueden arrancarlos del corazón..`;
+
+/* -------- navegación entre escenas -------- */
+function irA(numero){
+  document.querySelectorAll('.escena').forEach(e => e.classList.remove('activa'));
+  const siguiente = document.getElementById('escena-' + numero);
+  siguiente.classList.add('activa');
+  siguiente.style.animation = 'none';
+  void siguiente.offsetWidth;
+  siguiente.style.animation = '';
+
+  if(numero === 2) generarRamo();
+  if(numero === 6) generarJardinExtra();
+}
+
+/* -------- pétalos cayendo de fondo -------- */
+function crearPetalo(){
+  const contenedor = document.getElementById('campo-petalos');
+  const p = document.createElement('div');
+  p.className = 'petalo';
+  const izquierda = Math.random() * 100;
+  const duracion = 7 + Math.random() * 6;
+  const deriva = (Math.random() * 80 - 40) + 'px';
+  p.style.left = izquierda + 'vw';
+  p.style.setProperty('--drift', deriva);
+  p.style.animationDuration = duracion + 's';
+  p.style.width = p.style.height = (9 + Math.random() * 8) + 'px';
+  p.style.background = Math.random() > 0.5 ? 'var(--amarillo)' : 'var(--amarillo-suave)';
+  contenedor.appendChild(p);
+  setTimeout(() => p.remove(), duracion * 1000 + 200);
+}
+setInterval(crearPetalo, 650);
+for(let i=0;i<6;i++) setTimeout(crearPetalo, i*300);
+
+/* -------- corazones flotantes suaves -------- */
+function crearCorazon(x, y){
+  const c = document.createElement('div');
+  c.className = 'corazon-flot';
+  c.textContent = '💛';
+  c.style.left = x + 'px';
+  c.style.top = y + 'px';
+  const duracion = 2.4 + Math.random();
+  c.style.animationDuration = duracion + 's';
+  document.body.appendChild(c);
+  setTimeout(() => c.remove(), duracion * 1000 + 100);
+}
+
+document.addEventListener('click', (e) => {
+  if(e.target.closest('button, .sobre')) return;
+  crearCorazon(e.clientX - 8, e.clientY - 8);
+});
+
+/* -------- generar ramo de flores -------- */
+function generarRamo(){
+  const ramo = document.getElementById('ramo');
+  if(ramo.childElementCount > 0) return;
+  const posiciones = [
+    {left: 30, delay: 0.0, size: 42, rot: -12},
+    {left: 90, delay: 0.15, size: 50, rot: 0},
+    {left: 150, delay: 0.3, size: 42, rot: 12},
+    {left: 60, delay: 0.45, size: 38, rot: -6},
+    {left: 120, delay: 0.55, size: 38, rot: 6},
+  ];
+  posiciones.forEach(pos => {
+    const flor = document.createElement('div');
+    flor.className = 'flor';
+    flor.style.left = pos.left + 'px';
+    flor.style.width = flor.style.height = pos.size + 'px';
+    flor.style.animationDelay = pos.delay + 's';
+    flor.style.transform = `rotate(${pos.rot}deg)`;
+
+    const tallo = document.createElement('div');
+    tallo.className = 'tallo';
+    flor.appendChild(tallo);
+
+    for(let i=0;i<8;i++){
+      const petalo = document.createElement('div');
+      petalo.className = 'petalo-flor';
+      petalo.style.transform = `translate(-50%,-100%) rotate(${i*45}deg)`;
+      flor.appendChild(petalo);
+    }
+
+    const centro = document.createElement('div');
+    centro.className = 'centro';
+    flor.appendChild(centro);
+
+    ramo.appendChild(flor);
+  });
+}
+
+/* -------- sobre -------- */
+let sobreAbierto = false;
+function abrirSobre(){
+  if(sobreAbierto) return;
+  sobreAbierto = true;
+  const sobre = document.getElementById('sobre');
+  sobre.classList.add('abierto');
+  setTimeout(() => {
+    irA(5);
+    escribirCarta();
+  }, 750);
+}
+
+/* -------- efecto máquina de escribir para la carta -------- */
+function escribirCarta(){
+  const contenedor = document.getElementById('texto-carta');
+  const firma = document.getElementById('firma-carta');
+  contenedor.textContent = '';
+  firma.textContent = '';
+  let i = 0;
+  const velocidad = 14;
+  function escribir(){
+    if(i <= cartaTexto.length){
+      contenedor.textContent = cartaTexto.slice(0, i);
+      i += 3;
+      setTimeout(escribir, velocidad);
+    } else {
+      firma.textContent = remitente;
+      document.getElementById('boton-extra').style.display = 'inline-block';
+    }
+  }
+  escribir();
+}
+
+/* -------- reiniciar la experiencia -------- */
+function reiniciar(){
+  // limpiar ramo
+  const ramo = document.getElementById('ramo');
+  ramo.innerHTML = '';
+
+  // limpiar jardín extra
+  const jardin = document.getElementById('jardin-extra');
+  jardin.innerHTML = '';
+
+  // reiniciar sobre
+  sobreAbierto = false;
+  document.getElementById('sobre').classList.remove('abierto');
+
+  // limpiar carta
+  document.getElementById('texto-carta').textContent = '';
+  document.getElementById('firma-carta').textContent = '';
+  document.getElementById('boton-extra').style.display = 'none';
+
+  irA(1);
+}
+
+/* -------- mini flores de la escena extra -------- */
+function generarJardinExtra(){
+  const jardin = document.getElementById('jardin-extra');
+  if(jardin.childElementCount > 0) return;
+  const cantidad = 9;
+  for(let i=0;i<cantidad;i++){
+    const flor = document.createElement('span');
+    flor.className = 'mini-flor';
+    flor.textContent = '🌼';
+    flor.style.left = (i * (100/cantidad) + 2) + '%';
+    flor.style.animationDelay = (i * 0.09) + 's';
+    jardin.appendChild(flor);
+  }
+}
+</script>
+
+</body>
+</html>
